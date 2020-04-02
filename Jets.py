@@ -3,12 +3,19 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import h5py
+import os
 
+CP_PATH = "Model_0.1/cp.ckpt"
+CP_DIR = os.path.dirname(CP_PATH)
+# Create a callback that saves the model's weights
+CP_CALLBACK = tf.keras.callbacks.ModelCheckpoint(filepath=CP_PATH,
+                                                 save_weights_only=True,
+                                                 verbose=1)
 
 DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\Data\events_anomalydetection.h5'
 # DATA = '/Users/rotemmayo/Documents/PyCharm/ML4Jets-HUJI/jets_data_tiny.h5'
 
-N_EVENTS = 100000
+N_EVENTS = 1100000
 IS_JETS = False
 TEST_PERCENT = 0.2
 DATA_SET_NAME = 'dataset_1'
@@ -114,9 +121,9 @@ def learn(df):
     ])
     opt = tf.optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt,
-                  loss='mean_squared_error',
+                  loss='categorical_crossentropy',
                   metrics=['accuracy'])
-    model.fit(train_dataset, epochs=EPOCHS, verbose=2)
+    model.fit(train_dataset, epochs=EPOCHS, verbose=2, validation_data=test_dataset, callbacks=[CP_CALLBACK])
     model.evaluate(test_dataset)
 
 
@@ -127,11 +134,3 @@ def main():
 
 
 main()
-"""
-        tf.keras.layers.Dense(4096, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(2048, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(1024, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-"""
