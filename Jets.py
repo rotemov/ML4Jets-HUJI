@@ -80,21 +80,6 @@ def generator(filename, chunksize=512, total_size=1100000):
 Creates a tensorflow data set from a pandas dataframe, assuming the target value is in the last column.
 """
 
-"""
-def create_dataset_jets(df):
-    target = df.iloc[:, 0].astype(int)
-    df = df.iloc[:, 1:]
-    dataset = tf.data.Dataset.from_tensor_slices((df.values, target.values))
-    shuffled_dataset = dataset.shuffle(len(df)).batch(BATCH_SIZE)
-    # for feat, targ in shuffled_dataset.take(5):
-    #     print('Features: {}, Target: {}'.format(feat, targ))
-    return shuffled_dataset
-"""
-
-"""
-Creates a tensorflow data set from a pandas dataframe, assuming the target value is in the last column.
-"""
-
 
 def create_dataset(df):
     if IS_JETS:
