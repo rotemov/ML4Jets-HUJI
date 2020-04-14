@@ -6,6 +6,12 @@ import h5py
 
 DATA_SET_NAME = 'dataset_1'
 
+"""
+TODO: Zero padding
+TODO: Parse larger file
+"""
+
+
 
 def cluster_to_jets(events_combined):
     alljets = {}
