@@ -1,9 +1,13 @@
 from __future__ import print_function, division
+
+from datetime import datetime
 import numpy as np
 from pyjet import cluster,DTYPE_PTEPM
 import pandas as pd
 import h5py
 
+NUMBER_OF_EVENTS = 100000
+FILE_NAME = 'jets_data_100000.h5'
 DATA_SET_NAME = 'dataset_1'
 
 
@@ -11,8 +15,9 @@ def cluster_to_jets(events_combined):
     alljets = {}
     for mytype in ['background', 'signal']:
         alljets[mytype] = []
-        for i in range(np.shape(events_combined)[1]):
-            if (i % 100 == 0):
+        #for i in range(np.shape(events_combined)[1]):
+        for i in range(NUMBER_OF_EVENTS):
+            if (i % (NUMBER_OF_EVENTS/10) == 0):
                 print(mytype, i)
                 pass
             issignal = events_combined[i][2100]
@@ -52,20 +57,21 @@ def convert_to_x_y_z(jets, is_signal):
             event_cart += jet_cart
         events.append(event_cart)
     return events
-   # return [[[(jet.e, jet.px, jet.py, jet.pz), is_signal] for jet in jetlist] for jetlist in jets]
 
 
 def main():
-    print('test')
-    fnew = pd.read_hdf("/Users/rotemmayo/Documents/PyCharm/Data/events_anomalydetection_tiny.h5")
+    print(datetime.now())
+    fnew = pd.read_hdf("/Users/rotemmayo/Documents/PyCharm/Data/events_anomalydetection.h5")
     events_combined = fnew.T
-    np.shape(events_combined)
+    print(np.shape(events_combined))
     res = convert_all(cluster_to_jets(events_combined))
     df = pd.DataFrame.from_records(res)
     print(df.shape)
-    hf = h5py.File('jets_data_tiny.h5', 'w')
+
+    df.to_hdf(FILE_NAME, DATA_SET_NAME, mode='w', format='table')
+    hf = h5py.File(FILE_NAME, 'a')
     hf.close()
-    print()
+    print(datetime.now())
 
 main()
 
