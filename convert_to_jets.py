@@ -10,6 +10,12 @@ NUMBER_OF_EVENTS = 100000
 FILE_NAME = 'jets_data_100000.h5'
 DATA_SET_NAME = 'dataset_1'
 
+"""
+TODO: Zero padding
+TODO: Parse larger file
+"""
+
+
 
 def cluster_to_jets(events_combined):
     alljets = {}
