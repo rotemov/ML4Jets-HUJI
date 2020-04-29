@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 import tensorflow as tf
 import h5py
 import os
@@ -11,15 +12,15 @@ NOTE: jets_data_tiny.h5 is in a different format, thus will not work with the cu
 """
 
 # DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\Data\events_anomalydetection_tiny.h5'
-DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\ML4Jets-HUJI\jets_data_100000.h5'
-# DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\Data\events_anomalydetection.h5'
+# DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\ML4Jets-HUJI\jets_data_100000.h5'
+DATA = 'C:\\Users\\rotem\PycharmProjects\ML4Jets\Data\events_anomalydetection.h5'
 # DATA = '/Users/rotemmayo/Documents/PyCharm/ML4Jets-HUJI/jets_data_tiny.h5'
 
 
-MODEL = 3
+MODEL = 1
 CHUNK_SIZE = 2**15
 N_EVENTS = 2**13
-IS_JETS = True
+IS_JETS = False
 TEST_PERCENT = 0.2
 TOTAL_SIZE = 1100000
 DATA_SET_NAME = 'dataset_1'
@@ -31,7 +32,7 @@ Hyper-parameters
 EPOCHS = 10
 BATCH_SIZE = 16
 DROPOUT = 0.1
-LEARNING_RATE = 10**-1
+LEARNING_RATE = 10**-2
 
 
 """
@@ -98,30 +99,41 @@ def create_dataset(df):
 """
 For detector events dropout + batchnorm
 """
+
+
 def model_one():
     model = tf.keras.Sequential([
+        tf.keras.layers.Dropout(DROPOUT),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(512, activation='relu'),
         tf.keras.layers.Dropout(DROPOUT),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dropout(DROPOUT),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(DROPOUT),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(DROPOUT),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(32, activation='relu'),
         tf.keras.layers.Dropout(DROPOUT),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dropout(DROPOUT),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(8, activation='relu'),
         tf.keras.layers.Dropout(DROPOUT),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
     opt = tf.optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt,
                   loss='binary_crossentropy',
-                  metrics=['accuracy'])
+                  metrics=['accuracy', tf.keras.metrics.TruePositives()])
     return model
+
 
 
 """
@@ -151,7 +163,7 @@ def model_two():
     opt = tf.optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt,
                   loss='mean_squared_error',
-                  metrics=['accuracy'])
+                  metrics=['accuracy', tf.keras.metrics.TruePositives()])
     return model
 
 
@@ -182,7 +194,7 @@ def model_three():
     opt = tf.optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt,
                   loss='binary_crossentropy',
-                  metrics=['accuracy'])
+                  metrics=['accuracy', tf.keras.metrics.TruePositives()])
     return model
 
 
@@ -228,13 +240,17 @@ Learns using the generator
 def learn_generator():
     model = load_model()
     g1 = generator(DATA, chunksize=CHUNK_SIZE)
-    g2 = generator(DATA, chunksize=CHUNK_SIZE)
+    g2 = generator(DATA, chunksize=CHUNK_SIZE/4)
     validation_set = g2.__next__()
     for j in range(EPOCHS):
         for i in range(TOTAL_SIZE//CHUNK_SIZE):
             train_dataset = g1.__next__()
             model.fit(train_dataset, epochs=1, verbose=2, validation_data=validation_set, callbacks=[CP_CALLBACK])
         print("EPOCH" + str(j))
+    test_dataset = g2.__next__()
+    model.evaluate(test_dataset)
+    test_dataset = g2.__next__()
+    model.evaluate(test_dataset)
     test_dataset = g2.__next__()
     model.evaluate(test_dataset)
 
@@ -250,14 +266,17 @@ def test_model():
     g2 = generator(DATA, chunksize=CHUNK_SIZE)
     g2.__next__()
     test_dataset = g2.__next__()
-    model.evaluate(test_dataset)
+    model.evaluate(test_dataset, metrics=['accuracy', tf.keras.metrics.TruePositives()])
 
 
 def main():
-    df = read_h5(100000)
-    learn(df)
-    # learn_generator()
+    #df = read_h5(100000)
+    #learn(df)
+    learn_generator()
     # test_model()
 
+x=[1,2]
+plt.plot(x,x)
+plt.show()
+#main()
 
-main()
