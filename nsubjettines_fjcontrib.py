@@ -37,54 +37,59 @@ def _get_event_nsubjettines(outpute_file):
             rap, phi, pt = info[1:4]
             e = info[5]
             jet2 = {'tau1': float(tau1), 'tau2': float(tau2), 'rap': float(rap), 'phi': float(phi), 'pt': float(pt), 'e': float(e)}
+    print(jet1)
+    print(jet2)
     return jet1, jet2
 
 
 def _invmass(e, pt, eta):
     return e**2-(pt*math.cosh(eta))**2
 
+#
+# def get_subjettiness_fjcontrib(events_combined, m_total):
+#     # # Get an event that fits what we want
+#     # jets_in_range_indexes = [ i for i in range(len(m_total)) if 3000 <= m_total[i] <= 4000]
+#
+#     for event_col in events_combined:
+#         get_fjcontrib_nsubjettiness(event_col)
+#     print('Finished')
 
-def get_subjettiness_fjcontrib(events_combined, m_total):
-    # Get an event that fits what we want
-    jets_in_range_indexes = [ i for i in range(len(m_total)) if 3000 <= m_total[i] <= 4000]
 
-    for k in range(len(jets_in_range_indexes)):
-        event_col = events_combined[jets_in_range_indexes[k]]
-        event_string = ''
-        for j in range(700):
-            if event_col[j*3]>0:
-                E = event_col[j*3+3]
-                pT = event_col[j*3]
-                eta = event_col[j*3+1]
-                phi = event_col[j*3+2]
+def get_fjcontrib_nsubjettiness(event_col):
+    event_string = ''
+    for j in range(700):
+        if event_col[j * 3] > 0:
+            E = event_col[j * 3 + 3]
+            pT = event_col[j * 3]
+            eta = event_col[j * 3 + 1]
+            phi = event_col[j * 3 + 2]
 
-                # [px, py, pz, E]
-                nv = [pT*math.cos(phi), pT*math.sin(phi), pT*math.sinh(eta), E]
-                event_string += '\t'.join(map(str, nv)) + '\n'
+            # [px, py, pz, E]
+            nv = [pT * math.cos(phi), pT * math.sin(phi), pT * math.sinh(eta), E]
+            event_string += '\t'.join(map(str, nv)) + '\n'
 
-        epoch_time = int(time.time())
-        file_name = 'python' + str(epoch_time) + '.dat'
-        f = open("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + file_name, "w")
-        f.write(event_string)
-        f.close()
-        output_filename = "output_" + file_name
+    epoch_time = int(time.time())
+    file_name = 'python' + str(epoch_time) + '.dat'
+    f = open("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + file_name, "w")
+    f.write(event_string)
+    f.close()
+    output_filename = "output_" + file_name
 
-        bashCommand = "cd /Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/Nsubjettiness ;" \
-                      " ./my-short-example < ../data/" + file_name + " > ../data/" + output_filename
-        try:
-            os.system(bashCommand)
-            jet1, jet2 = _get_event_nsubjettines("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + output_filename)
+    bashCommand = "cd /Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/Nsubjettiness ;" \
+                  " ./my-short-example < ../data/" + file_name + " > ../data/" + output_filename
+    try:
+        os.system(bashCommand)
+        jet1, jet2 = _get_event_nsubjettines(
+            "/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + output_filename)
 
-            m1 = _invmass(jet1['e'], jet1['pt'], jet1['rap'])
-            m2 = _invmass(jet2['e'], jet2['pt'], jet2['rap'])
+        m1 = _invmass(jet1['e'], jet1['pt'], jet1['rap'])
+        m2 = _invmass(jet2['e'], jet2['pt'], jet2['rap'])
 
-            if m1 >= 0 and m2 >= 0:
-                print(k, m1, m2)
+        if m1 >= 0 and m2 >= 0:
+            print(m1, m2)
 
-        except:
-            traceback.print_exc()
-        finally:
-            os.remove("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + output_filename)
-            os.remove("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + file_name)
-
-    print('Finished', k)
+    except:
+        traceback.print_exc()
+    finally:
+        os.remove("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + output_filename)
+        os.remove("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + file_name)
