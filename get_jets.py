@@ -19,7 +19,7 @@ def get_jets_from_black_box(box_number, number_of_events=None, R=1.0):
     :param box_number: The number of the black box to read
     :param number_of_events: The number of events to read, default to all of them
     :param R: The jet radius to cluster bt, defaults to 1.0
-    :return: list of lists of all jets relating to one event
+    :return: list of lists of all jets relating to one event, events_combined
     """
     fnew = pd.read_hdf(BLACK_BOX_FILE_PATH % box_number, stop=number_of_events)
     events_combined = fnew.T
@@ -38,7 +38,7 @@ def get_jets_from_black_box(box_number, number_of_events=None, R=1.0):
         jets = sequence.inclusive_jets(ptmin=20)
         all_jets += [jets]
 
-    return all_jets
+    return all_jets, events_combined
 
 
 def save_jets_to_file(box_number, new_file_name, data_set_name='dataset_1', number_of_events=None, R=1.0):
