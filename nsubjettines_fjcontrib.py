@@ -52,8 +52,8 @@ def _invmass(e, pt, eta):
 R = 0.4
 p = -1
 FILE_PATH = "/Users/rotemmayo/Documents/PyCharm/Data/events_LHCO2020_BlackBox1.h5"
-NUMBER_OF_EVENTS = 1000
-TRY_SUBJETTINES = False
+NUMBER_OF_EVENTS = 100
+TRY_SUBJETTINES = True
 
 
 # Read File
@@ -145,7 +145,7 @@ if TRY_SUBJETTINES:
         output_filename = "output_" + file_name
 
         bashCommand = "cd /Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/Nsubjettiness ;" \
-                      " ./short-example2 < ../data/" + file_name + " > ../data/" + output_filename
+                      " ./my-short-example < ../data/" + file_name + " > ../data/" + output_filename
         try:
             os.system(bashCommand)
             jet1, jet2 = _get_event_nsubjettines("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + output_filename)
@@ -171,3 +171,46 @@ if TRY_SUBJETTINES:
             os.remove("/Users/rotemmayo/Downloads/working_fastjet/fjcontrib-1.044/data/" + file_name)
 
     print('Finished', k)
+
+if subjettiness:
+    # subjettiness defined in https://arxiv.org/abs/1011.2268
+    particles = alljets[0].constituents_array()
+    nparticles = len(particles['eta'])
+    sequence = cluster(particles, R=R, p=1)
+
+    # calculate \tau_1, ..., \tau_N
+    nsubjets = [1, 2, 3, 4]
+    tau = np.zeros(len(nsubjets))
+    for nsubj in nsubjets:
+        # get nsubj subjets from jet
+        if nsubj >= nparticles: continue
+        subjets = sequence.exclusive_jets(nsubj)
+
+        # find subjet centrals and put in array
+        #             subjet_etaphi = np.zeros((nsubj,2))
+
+        # calculate distance from each particle to each subjet center
+
+        Delta_Rs = np.zeros((nparticles, nsubj))
+        for j, subj in enumerate(subjets):
+
+            # if phi is near pi some particles can be near -pi,
+            # some near pi, so average does not work to get center.
+            # therefore wrap to <pi/2 if |phi| > pi/2
+            if abs(subj.phi) > np.pi / 2:
+                Delta_Rs[:, j] = np.sqrt((particles['eta'] - subj.eta) ** 2 +
+                                         (particles['phi'] % (2 * np.pi) - subj.phi % (2 * np.pi)) ** 2)
+            else:
+                Delta_Rs[:, j] = np.sqrt((particles['eta'] - subj.eta) ** 2 +
+                                         (particles['phi'] - subj.phi) ** 2)
+
+        Delta_R = np.min(Delta_Rs, axis=1)
+
+        # tau_N = 1/d0 \sum_k p_{T,k} min{\Delta R_{1,k}, ..., \Delta R_{N,k}}
+    # d0 = \sum_k p_{T,k} R
+    # \Delta R = sqrt((\Delta eta)^2+(\Delta phi)^2)
+    tau[nsubj - 1] = 1. / np.sum(particles['pT'] * R) * np.sum(particles['pT'] * Delta_R)
+
+    if tau[nsubj - 1] > 1.:
+        print("broke on event", event)
+        print("pti, etai, phii = ", pti, etai, phii)
