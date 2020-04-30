@@ -7,7 +7,6 @@ from nsubjettines_fjcontrib import get_fjcontrib_nsubjettiness
 R = 1.0
 NUMBER_OF_EVENTS = 10
 
-
 all_jets, events_combined = get_jets_from_black_box(1, NUMBER_OF_EVENTS, R=R)
 
 # x = [max(get_m1(event_jets), get_m2(event_jets)) for event_jets in all_jets]

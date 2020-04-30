@@ -3,11 +3,18 @@ import numpy as np
 from pyjet import cluster,DTYPE_PTEPM
 import pandas as pd
 import math
+from event import Event
 
 
 class EventFileParser:
 
-    def __init__(self, file_name, chunk_size=512, total_size=1100000):
+    """
+    Parses event files as given in the LHC olympics. Each line in an h5 file consists of maximum 700 partons with the
+    coordinates (pt, eta, phi) and is zero padded. The 2101 cell contains a flag if it is signal or not in the
+    development set.
+    dev set should include ~100k signal ~1m bg.
+    """
+    def __init__(self, file_name, chunk_size=512, total_size=1100000, R=1.0, ptmin=20):
         """
         Creates an EventFileParser for the format of the files in the LHC olympics 2020
         :param file_name: the path to the file
@@ -18,7 +25,9 @@ class EventFileParser:
         self.chunksize = chunk_size
         self.total_size = total_size
         self.iterations = math.ceil(total_size / chunk_size)
-        self.alljets = {'background' : [], 'signal' : []}
+        self.R = R
+        self.ptmin = ptmin
+        self.all_events = {'background' : [], 'signal' : []}
 
     @staticmethod
     def data_generator(filename, chunksize, total_size):
@@ -59,120 +68,12 @@ class EventFileParser:
                         pseudojets_input[j]['phi'] = event[j * 3 + 2]
                         pass
                     pass
-                sequence = cluster(pseudojets_input, R=1.0, p=-1)
-                jets = sequence.inclusive_jets(ptmin=20)
-                self.alljets[mytype] += [jets]
+                sequence = cluster(pseudojets_input, R=self.R, p=-1)
+                jets = sequence.inclusive_jets(ptmin=self.ptmin)
+                event = Event(jets)
+                self.all_events[mytype] += [event]
                 pass
             print("Chunk " + str(k) + " complete")
 
-
-    @staticmethod
-    def invariant_mass(jets):
-        """
-        Finds the invariant mass of a list of jets.
-        :param jets: A list of jets from pyjet (PsuedoJet objects from pyjet cluster function)
-        :return: The invariant mass of the jets
-        """
-        E, px, py, pz = 0, 0, 0, 0
-        for jet in jets:
-            E += jet.e
-            px += jet.px
-            py += jet.py
-            pz += jet.pz
-        mass = (E**2 - px**2 - py**2 - pz**2)**0.5
-        return mass
-
-    @staticmethod
-    def m_tot(jets):
-        """
-        Finds the invariant mass of all the jets in an event.
-        :param jets: A list of all the jets from an even as given by pyjet cluster function (PsuedoJet objects).
-        :return: The invariant mass of the jets.
-        """
-        m_tot = EventFileParser.invariant_mass(jets)
-        return m_tot
-
-    @staticmethod
-    def mjj(jets):
-        """
-        Finds the invariant mass of all the jets in an event.
-        :param jets: A list of all the jets from an even as given by pyjet cluster function (PsuedoJet objects).
-        :return: The invariant mass of the jets.
-        """
-        if len(jets) >= 2 :
-            return EventFileParser.invariant_mass(jets[0:2])
-        else:
-            return EventFileParser.invariant_mass(jets)
-
-    @staticmethod
-    def m1(jets):
-        """
-        finds the invariant mass of the leading jet in an event.
-        :param jets: A list of all the jets from an even as given by pyjet cluster function (PsuedoJet objects).
-        :return: The invariant mass of the leading jet.
-        """
-        if len(jets) > 0:
-            return jets[0].mass
-        else:
-            return 0
-
-    @staticmethod
-    def m2(jets):
-        """
-        finds the invariant mass of the second leading jet in an event.
-        :param jets: A list of all the jets from an even as given by pyjet cluster function (PsuedoJet objects).
-        :return: The invariant mass of the second leading jet.
-        """
-        if len(jets) > 1:
-            return jets[1].mass
-        else:
-            return 0
-
-    @staticmethod
-    def m1_minus_m2(jets):
-        """
-        Finds m1-m2 observable.
-        :param jets: A list of all the jets from an even as given by pyjet cluster function (PsuedoJet objects).
-        :return: The invariant mass of the second leading jet.
-        """
-        return EventFileParser.m1(jets)-EventFileParser.m2(jets)
-
-    @staticmethod
-    def get_nsubjettiness(jet, R=1.0, max_tau=4):
-        """
-        Calculate tau1, ..., tauN for the given jet (where N = max_tau)
-
-        :param jet: The jet
-        :param R: Radius to use when clustering
-        :param max_tau: Highest tau to calculate
-        :return: List containing all taus
-        """
-        particles = jet.constituents_array()
-        num_particles = len(particles['eta'])
-        sequence = cluster(particles, R=R, p=1)
-
-        tau = np.zeros(max_tau)
-
-        for i in range(1, min(max_tau + 1, num_particles)):
-            sub_jets = sequence.exclusive_jets(i)
-
-            delta_rs = np.zeros((num_particles, i))
-            for j, sub_jet in enumerate(sub_jets):
-
-                eta = particles['eta']
-                phi = particles['phi']
-                pi = np.pi
-
-                if abs(sub_jet.phi) > pi / 2:
-                    delta_rs[:, j] = np.sqrt(
-                        (eta - sub_jet.eta) ** 2 + (phi % (2 * pi) - sub_jet.phi % (2 * pi)) ** 2)
-                else:
-                    delta_rs[:, j] = np.sqrt((eta - sub_jet.eta) ** 2 + (phi - sub_jet.phi) ** 2)
-
-            delta_r = np.min(delta_rs, axis=1)
-            tau[i - 1] = 1. / np.sum(particles['pT'] * R) * np.sum(particles['pT'] * delta_r)
-
-        return list(tau)
-
-    # TODO: Add n-subjettiness of different levels. Add more relevant observables.
+    # TODO: Add event to list function.
     # TODO: Add output_h5_file function.
