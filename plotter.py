@@ -24,8 +24,8 @@ class Plotter:
         :param y_label: y axis label
         """
         plt.figure()
-        plt.hist(map(func, self.background_events), bins=50, facecolor='b', alpha=0.2, label='background')
-        plt.hist(map(func, self.signal_events), bins=50, facecolor='r', alpha=0.2, label='signal')
+        plt.hist(self._flatten(map(func, self.background_events)), bins=50, facecolor='b', label='background')
+        plt.hist(self._flatten(map(func, self.signal_events)), bins=50, facecolor='r', label='signal')
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.legend(loc='upper right')
@@ -41,9 +41,24 @@ class Plotter:
         :param y_label: y axis label
         """
         plt.figure()
-        plt.scatter(map(xfunc, self.background_events), map(yfunc, self.background_events), c='b', label='background')
-        plt.scatter(map(xfunc, self.signal_events), map(yfunc, self.signal_events), c='r', label='signal')
+        plt.scatter(self._flatten(map(xfunc, self.background_events)), self._flatten(map(yfunc, self.background_events)), c='b', label='background')
+        plt.scatter(self._flatten(map(xfunc, self.signal_events)), self._flatten(map(yfunc, self.signal_events)), c='r', label='signal')
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.legend(loc='upper left')
         plt.show()
+
+    def _flatten(self, l):
+        """
+        Flatten the list l if it contains more lists
+
+        :param l: A list, can be a list of lists
+        :return: A list of numbers
+        """
+        flat_list = []
+        for item in l:
+            if isinstance(item, list):
+                flat_list += item
+            else:
+                flat_list += [item]
+        return flat_list
