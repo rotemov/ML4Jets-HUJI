@@ -46,15 +46,34 @@ class Event:
             px += jet.px
             py += jet.py
             pz += jet.pz
+        if (e**2 - px**2 - py**2 - pz**2) < 0:
+            print('WARNING complex invariant mass for event (%f, %f, %f, %f)' % tuple([e, px, py, pz]))
+            return 0
         return (e**2 - px**2 - py**2 - pz**2)**0.5
 
     @cached_property
     def m_tot(self):
         """
+        Finds the invariant mass of the event.
+        :return: The invariant mass of the event.
+        """
+        return self.invariant_mass(self.jets)
+
+    @cached_property
+    def all_jet_mass(self):
+        """
         Finds the invariant mass of all the jets in the event.
         :return: The invariant mass of the jets.
         """
-        return self.invariant_mass(self.jets)
+        return [self.invariant_mass(jet) for jet in self.jets]
+
+    @cached_property
+    def all_jet_pt(self):
+        """
+        Finds the pt of all the jets in the event.
+        :return: The invariant mass of the jets.
+        """
+        return [jet.pt for jet in self.jets]
 
     @cached_property
     def mjj(self):
@@ -74,7 +93,7 @@ class Event:
         :return: The invariant mass of the leading jet.
         """
         if len(self.jets) > 0:
-            return self.jets[0].mass
+            return self.invariant_mass(self.jets[0])
         return 0
 
     @cached_property
@@ -84,7 +103,7 @@ class Event:
         :return: The invariant mass of the second leading jet.
         """
         if len(self.jets) > 1:
-            return self.jets[1].mass
+            return self.invariant_mass(self.jets[1])
         return 0
 
     @cached_property
@@ -189,6 +208,13 @@ class Event:
         [[jet1_tau1, jet1_tau2, ...], [jet2_tau1, jet2_tau2, ...], ...]
         """
         return [self.jet_nsubjettiness(jet, R, max_tau) for jet in self.jets]
+
+    @cached_property
+    def all_tau21(self):
+        """
+
+        """
+        return [nsubjetiness[1]/nsubjetiness[0] for nsubjetiness in self.nsubjettiness]
 
     # TODO: Add more observables
     # TODO: Sanity tests
