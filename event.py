@@ -47,7 +47,7 @@ class Event:
             py += jet.py
             pz += jet.pz
         if (e**2 - px**2 - py**2 - pz**2) < 0:
-            print('WARNING complex invariant mass for event (%f, %f, %f, %f)' % tuple([e, px, py, pz]))
+            # We get a rounding error here, the number is just very close to zero
             return 0
         return (e**2 - px**2 - py**2 - pz**2)**0.5
 
