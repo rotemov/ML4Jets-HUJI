@@ -16,5 +16,8 @@ def compare_george_to_contrib():
 
     print('### GEORGE ###')
     for jet in events[0].jets:
-        print(jet)
+        print(str(jet) + ' energy: ' + str(jet.e))
         print('tau1: %f, tau2: %f, tau3: %f, tau4: %f\n' % tuple(nsubjettiness.get_nsubjettiness(jet, R=R)))
+
+
+compare_george_to_contrib()

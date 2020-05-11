@@ -5,7 +5,6 @@ import os
 import traceback
 
 
-
 def _get_event_nsubjettines(outpute_file):
     output = open(outpute_file, "rb").read()
     lines = output.split("\n")
@@ -59,13 +58,17 @@ def get_fjcontrib_nsubjettiness(event_col):
     event_string = ''
     for j in range(700):
         if event_col[j * 3] > 0:
-            E = event_col[j * 3 + 3]
             pT = event_col[j * 3]
             eta = event_col[j * 3 + 1]
             phi = event_col[j * 3 + 2]
 
-            # [px, py, pz, E]
-            nv = [pT * math.cos(phi), pT * math.sin(phi), pT * math.sinh(eta), E]
+            px = pT * math.cos(phi)
+            py = pT * math.sin(phi)
+            pz = pT * math.sinh(eta)
+
+            e = (px**2 + py**2 + pz**2)**0.5
+
+            nv = [px, py, pz, e]
             event_string += '\t'.join(map(str, nv)) + '\n'
 
     epoch_time = int(time.time())
