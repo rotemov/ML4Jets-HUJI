@@ -10,20 +10,25 @@ plt.rcParams['font.family'] = 'serif'
 
 
 def get_data_from_file():
-    NUMBER_OF_EVENTS = 100
+    NUMBER_OF_EVENTS = 10
 
     signal_events, background_events, events_combined = get_jets_from_training_data(NUMBER_OF_EVENTS)
 
-    events_dat = []
-    for e in events_combined.iteritems():
-        if e[1][2100] == 1:
-            events_dat += [[]]
-            for i in range(0, 700):
-                if e[1][3 * i] == 0:
-                    continue
-                else:
-                    events_dat[-1] += [[e[1][3 * i], e[1][3 * i + 1], e[1][3 * i + 2]]]
-    return events_dat
+    events_data = []
+    for i in range(np.shape(events_combined)[1]):
+        # Take only signal events
+        event_column = events_combined[i]
+        if int(event_column[2100]) == 0:#1:
+            event_data = []
+            for j in range(700):
+                if event_column[j * 3] > 0:
+                    pt = event_column[j * 3]
+                    eta = event_column[j * 3 + 1]
+                    phi = event_column[j * 3 + 2]
+
+                    event_data += [[pt, eta, phi]]
+            events_data += [event_data]
+    return events_data
 
 
 def get_data_from_web():
@@ -59,13 +64,14 @@ def get_data_from_web():
     # ev0, ev1 = Gs[0], Gs[15]
 
 
-def plot_emd(ev0, ev1, Gs, Qs):
+def plot_emd(ev0, ev1):
     # calculate the EMD and the optimal transport flow
     R = 0.4
     emdval, G = ef.emd.emd(ev0, ev1, R=R, return_flow=True)
-    print(emdval)
-    if not (10 < emdval < 1000):
+    if not (10 < emdval < 5000):
         return
+
+    print('Made It Here!')
     # plot the two events
     colors = ['red', 'blue']
     labels = ['Gluon Jet 1', 'Gluon Jet 2']
@@ -128,7 +134,9 @@ def plot_emd(ev0, ev1, Gs, Qs):
     plt.show()
     """
 
+
 events_dat = get_data_from_file()
+print('Found %d signal events' % len(events_dat))
 for pair in itertools.product(events_dat, repeat=2):
     (ev0, ev1) = pair
-    plot_emd(np.array(ev0), np.array(ev1), events_dat, [])
+    plot_emd(np.array(ev0), np.array(ev1))
