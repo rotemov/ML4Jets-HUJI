@@ -63,7 +63,8 @@ def plot_emd(ev0, ev1, Gs, Qs):
     # calculate the EMD and the optimal transport flow
     R = 0.4
     emdval, G = ef.emd.emd(ev0, ev1, R=R, return_flow=True)
-    if (emdval > 1000) and (emdval < 10):
+    print(emdval)
+    if not (10 < emdval < 1000):
         return
     # plot the two events
     colors = ['red', 'blue']
