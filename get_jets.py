@@ -10,7 +10,7 @@ TRAINING_DATA_FILE_PATH = './Data/events_anomalydetection.h5'
 BLACK_BOX_FILE_PATH = './Data/BlackBox/events_LHCO2020_BlackBox%d.h5'
 PARSED_DATA_FILE_PATH = './Data/Parsed_Data/%s.h5'
 
-MAX_EVENT_PARTICLE_NUMBER = 700
+MAX_EVENT_PARTICLE_NUMBER_DIV_3 = 2100 / 3
 
 
 def get_jets_from_black_box(box_number, number_of_events=None, R=1.0, eta_cut=2.5):
@@ -41,7 +41,7 @@ def get_jets_from_black_box(box_number, number_of_events=None, R=1.0, eta_cut=2.
 
 def get_jets_from_training_data(number_of_events=None, R=1.0, eta_cut=2.5):
     """
-    Parse the file grouped int signal and background into Event objects.
+    Parse the file grouped into signal and background into Event objects.
     Each event contains all jets relating to it (within the given eta cut).
     Clustering is done using pyjet.
     For each event, jets are ordered in descending order of pt.
@@ -68,6 +68,36 @@ def get_jets_from_training_data(number_of_events=None, R=1.0, eta_cut=2.5):
                 background_events.append(Event(jets))
 
     return signal_events, background_events, events_combined
+
+
+def get_events_from_training_data(number_of_events):
+    """
+    Parse the file grouped into signal and background
+
+    :param number_of_events: The number of events to read, default to all of them
+
+    :return: list of list, each list represents an event and contains a list of lists containing
+             [pt, eta, phi, is_signal]
+    todo: find a better way to return is signal
+    """
+    fnew = pd.read_hdf(TRAINING_DATA_FILE_PATH, stop=number_of_events)
+    events_combined = fnew.T
+
+    events = []
+    for i in tqdm(range(np.shape(events_combined)[1])):
+        event_column = events_combined[i]
+        is_signal = int(event_column[2100]) == 1
+        event_data = []
+        for j in range(MAX_EVENT_PARTICLE_NUMBER_DIV_3):
+            if event_column[j * 3] > 0:
+                pt = event_column[j * 3]
+                eta = event_column[j * 3 + 1]
+                phi = event_column[j * 3 + 2]
+
+                event_data += [[pt, eta, phi, is_signal]]
+        events += [event_data]
+
+    return events
 
 
 def save_jets_to_file(box_number, new_file_name, data_set_name='dataset_1', number_of_events=None, R=1.0):
@@ -118,7 +148,7 @@ def _cluster_event_column(event_column, R, eta_cut):
              Jets are pyjet PseudoJet objects
     """
     pseudojets_input = np.zeros(len([x for x in event_column[::3] if x > 0]), dtype=DTYPE_PTEPM)
-    for j in range(MAX_EVENT_PARTICLE_NUMBER):
+    for j in range(MAX_EVENT_PARTICLE_NUMBER_DIV_3):
         if event_column[j * 3] > 0:
             pseudojets_input[j]['pT'] = event_column[j * 3]
             pseudojets_input[j]['eta'] = event_column[j * 3 + 1]
