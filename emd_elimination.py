@@ -2,6 +2,7 @@ import random
 import numpy as np
 import energyflow as ef
 from get_jets import get_events_from_training_data
+from tqdm import tqdm
 
 
 def get_emdval(ev0, ev1):
@@ -24,6 +25,8 @@ start_events_num = len(events_dat)
 
 min_emd = 0
 EMD_CUT_OFF = 5000
+
+pbar = tqdm(total=NUMBER_OF_EVENTS)
 while min_emd < EMD_CUT_OFF and len(events_dat) > 0:
     events_dat.remove(filter_event)
     min_emd = 100000000
@@ -38,6 +41,9 @@ while min_emd < EMD_CUT_OFF and len(events_dat) > 0:
     if VERBOSE:
         print 'Filter event: is signal: %d, emd from last: %f' % (min_event[0][3], min_emd)
     filter_event = min_event
+    pbar.update(1)
+pbar.close()
+
 
 end_signal_num = len([e for e in events_dat if e[0][3]])
 end_events_num = len(events_dat)
