@@ -22,16 +22,16 @@ class Event:
         :param jets: A list of the jets in the event.
         """
         self.jets = jets
-        self._populate_jets_cart()
         self.index = index
         self.box = box
         self.is_signal = is_signal
 
-    def _populate_jets_cart(self):
+    @cached_property
+    def jets_cart(self):
         """
         Populates jets cart with the jet's cartesian coordinates.
         """
-        self.jets_cart = [[jet.px, jet.py, jet.pz, jet.e] for jet in self.jets]
+        return [[jet.px, jet.py, jet.pz, jet.e] for jet in self.jets]
 
     @staticmethod
     def invariant_mass(jets):
@@ -212,9 +212,18 @@ class Event:
     @cached_property
     def all_tau21(self):
         """
-
+        Gets the tau21 of all of the jets
+        :return: The tau21 of all of the jets
         """
         return [nsubjetiness[1]/nsubjetiness[0] for nsubjetiness in self.nsubjettiness]
-
+    """
+    def __dict__(self):
+        return {"index": self.index,
+                "box": self.box,
+                "mjj": self.mjj,
+                "m1": self.m1,
+                "m2": self.m2,
+                "jets_cart": self.jets_cart}
+    """
     # TODO: Add more observables
     # TODO: Sanity tests

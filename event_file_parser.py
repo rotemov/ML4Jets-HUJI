@@ -4,6 +4,8 @@ from pyjet import cluster,DTYPE_PTEPM
 import pandas as pd
 import math
 from event import Event
+import jsonpickle
+from serializable_psuedo_jet import SerializablePseudoJet
 
 
 class EventFileParser:
@@ -14,7 +16,7 @@ class EventFileParser:
     development set.
     dev set should include ~100k signal ~1m bg.
     """
-    def __init__(self, file_name, chunk_size=512, total_size=1100000, R=1.0, ptmin=20):
+    def __init__(self, file_name, json_name, chunk_size=512, total_size=1100000, R=1.0, ptmin=20):
         """
         Creates an EventFileParser for the format of the files in the LHC olympics 2020
         :param file_name: the path to the file
@@ -25,6 +27,7 @@ class EventFileParser:
         self.chunksize = chunk_size
         self.total_size = total_size
         self.iterations = math.ceil(total_size / chunk_size)
+        self.json_name = json_name
         self.R = R
         self.ptmin = ptmin
         self.all_events = {'background' : [], 'signal' : []}
@@ -70,10 +73,25 @@ class EventFileParser:
                     pass
                 sequence = cluster(pseudojets_input, R=self.R, p=-1)
                 jets = sequence.inclusive_jets(ptmin=self.ptmin)
-                event = Event(jets)
+                sjets = [SerializablePseudoJet(j) for j in jets]
+                event = Event(sjets)
                 self.all_events[mytype] += [event]
                 pass
             print("Chunk " + str(k) + " complete")
 
+
+    #TODO: make this output a file and parse a file
+    #TODO: make this ouput the parser itself might be even better
+    def events_to_json(self):
+        """
+        Makes all events into a json format.
+        :return: json format of all events
+        """
+        return jsonpickle.encode(self.all_events)
+
+    @staticmethod
+    def events_from_json(frozen):
+        return jsonpickle.decode(frozen)
+
     # TODO: Add event to list function.
-    # TODO: Add output_h5_file function.
+    # TODO: Add output_json_file function.
