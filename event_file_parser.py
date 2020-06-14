@@ -3,6 +3,9 @@ import numpy as np
 from pyjet import cluster,DTYPE_PTEPM
 import pandas as pd
 import math
+
+from tqdm import tqdm
+
 from event import Event
 import jsonpickle
 from serializable_psuedo_jet import SerializablePseudoJet
@@ -26,7 +29,7 @@ class EventFileParser:
         self.file = EventFileParser.data_generator(file_name, chunk_size, total_size)
         self.chunksize = chunk_size
         self.total_size = total_size
-        self.iterations = math.ceil(total_size / chunk_size)
+        self.iterations = int(math.ceil(total_size / chunk_size))
         self.json_name = json_name
         self.R = R
         self.ptmin = ptmin
@@ -54,8 +57,8 @@ class EventFileParser:
         Parses the file into a list of PsuedoJets of the events saved in the field alljets
         :return: None
         """
-        for k in range(self.iterations):
-            raw_events = (self.file.__next__())
+        for k in tqdm(range(self.iterations)):
+            raw_events = self.file.next()
             n_events = np.shape(raw_events)[0]
             for index, event in raw_events.iterrows():
                 issignal = (int(event[2100]) == 1)
@@ -75,9 +78,9 @@ class EventFileParser:
                 jets = sequence.inclusive_jets(ptmin=self.ptmin)
                 sjets = [SerializablePseudoJet(j) for j in jets]
                 event = Event(sjets)
-                self.all_events[mytype] += [event]
+                self.all_events[mytype] += [event.get_as_output()]
                 pass
-            print("Chunk " + str(k) + " complete")
+            # print("Chunk " + str(k) + " complete")
 
 
     #TODO: make this output a file and parse a file
