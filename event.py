@@ -225,5 +225,13 @@ class Event:
                 "m2": self.m2,
                 "jets_cart": self.jets_cart}
     """
+
+    def get_as_output(self):
+        """
+        :return: array containing: mjj, nj, m_tot, first 2 tau21
+        """
+        return [self.mjj, self.nj, self.m_tot] + self.all_tau21[:2]
+
+
     # TODO: Add more observables
     # TODO: Sanity tests
