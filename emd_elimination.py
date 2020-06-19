@@ -112,7 +112,7 @@ def get_bin_mean_dist(b):
 
 
 # Read Events
-NUMBER_OF_EVENTS = 100
+NUMBER_OF_EVENTS = 10
 VERBOSE = False
 events_dat = get_events_from_training_data(NUMBER_OF_EVENTS)
 
@@ -121,13 +121,14 @@ background_events = [e for e in events_dat if not e[0][3]]
 signal_events = [e for e in events_dat if e[0][3]]
 events = signal_events + background_events
 
-# create_xls(events, 'emd test')
+create_xls(events, 'emd test 2')
 # filter_out_events(background_events, events_dat)
-b = bins(events_dat)
-b.sort(key=len)
-print 'num of bins: %d' % (len(b))
-for bin in b:
-    s = len([e for e in bin if e[0][3]])
-    print '     bin size: %d, bins mean dist: %d, signal: %d' % (len(bin), get_bin_mean_dist(bin), s)
 
-os.system('say "Finished"')
+# b = bins(events_dat)
+# b.sort(key=len)
+# print 'num of bins: %d' % (len(b))
+# for bin in b:
+#     s = len([e for e in bin if e[0][3]])
+#     print '     bin size: %d, bins mean dist: %d, signal: %d' % (len(bin), get_bin_mean_dist(bin), s)
+#
+# os.system('say "Finished"')
