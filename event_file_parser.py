@@ -1,6 +1,6 @@
 from __future__ import print_function, division
 import numpy as np
-from pyjet import cluster,DTYPE_PTEPM
+from pyjet import cluster, DTYPE_PTEPM
 import pandas as pd
 import math
 

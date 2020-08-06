@@ -93,7 +93,7 @@ class Event:
         :return: The invariant mass of the leading jet.
         """
         if len(self.jets) > 0:
-            return self.invariant_mass(self.jets[0])
+            return self.invariant_mass([self.jets[0]])
         return 0
 
     @cached_property
@@ -103,7 +103,7 @@ class Event:
         :return: The invariant mass of the second leading jet.
         """
         if len(self.jets) > 1:
-            return self.invariant_mass(self.jets[1])
+            return self.invariant_mass([self.jets[1]])
         return 0
 
     @cached_property
@@ -230,7 +230,7 @@ class Event:
         """
         :return: array containing: mjj, nj, m_tot, first 2 tau21
         """
-        return [self.mjj, self.nj, self.m_tot] + self.all_tau21[:2]
+        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2]
 
 
     # TODO: Add more observables
