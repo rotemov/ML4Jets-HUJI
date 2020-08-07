@@ -34,6 +34,23 @@ def create_xls(events_list, name):
     wb.save(name + '.xls')
 
 
+def create_csv(events_list, name):
+    with open(name, 'w') as f:
+        for e in events:
+            f.write(',Sig' if e[0][3] else ',Bkg')
+        f.write('\n')
+
+        for i in tqdm(range(len(events_list))):
+            f_event = events_list[i]
+            line = 'Sig' if f_event[0][3] else 'Bkg'
+            for j in range(len(events_list[:i+1])):
+                s_event = events_list[j]
+                emd = get_emdval(np.array([l[:3] for l in f_event]), np.array([l[:3] for l in s_event]))
+                line += ',' + str(int(emd))
+            f.write(line + '\n')
+            f.flush()
+
+
 def filter_out_events(background_events_list, events_list):
     random_index = random.randrange(len(background_events_list))
     filter_event = background_events_list[random_index]
@@ -112,8 +129,9 @@ def get_bin_mean_dist(b):
 
 
 # Read Events
-NUMBER_OF_EVENTS = 10
+NUMBER_OF_EVENTS = 1000
 VERBOSE = False
+print 'Read Events'
 events_dat = get_events_from_training_data(NUMBER_OF_EVENTS)
 
 # Choose a background event randomly as a start filter event
@@ -121,7 +139,8 @@ background_events = [e for e in events_dat if not e[0][3]]
 signal_events = [e for e in events_dat if e[0][3]]
 events = signal_events + background_events
 
-create_xls(events, 'emd test 2')
+print 'saving to: ' + os.path.abspath('emd_test.csv')
+create_csv(events, 'emd_test.csv')
 # filter_out_events(background_events, events_dat)
 
 # b = bins(events_dat)
