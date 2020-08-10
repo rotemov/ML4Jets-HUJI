@@ -20,3 +20,5 @@ Contest details:
 LHCO landing page - https://lhco2020.github.io/homepage/
 
 Training dataset - https://zenodo.org/record/2629073#.Xuokt-dRWUl
+
+Parsed Data - https://drive.google.com/drive/folders/1IybIsgrpDggMmhcacIqKXO8XDPNbAPck?usp=sharing
