@@ -77,7 +77,7 @@ class EventFileParser:
                 sequence = cluster(pseudojets_input, R=self.R, p=-1)
                 jets = sequence.inclusive_jets(ptmin=self.ptmin)
                 sjets = [SerializablePseudoJet(j) for j in jets]
-                event = Event(sjets)
+                event = Event(sjets, R=self.R)
                 self.all_events[mytype] += [event.get_as_output()]
                 pass
             # print("Chunk " + str(k) + " complete")
