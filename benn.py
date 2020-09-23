@@ -1,28 +1,23 @@
 from event_file_parser import EventFileParser
-from get_jets import get_jets_from_training_data
 import numpy as np
-
-# NUMBER_OF_EVENTS = 100000
-# signal_events, background_events, _ = get_jets_from_training_data(NUMBER_OF_EVENTS)
-# all_events = signal_events + background_events
 
 """
 File the data was created from.
 """
 
+R_VALUES = 0.4, 0.6, 0.8, 1.0
+
 TRAINING_DATA_FILE_PATH = './Data/events_anomalydetection.h5'
 
-parser = EventFileParser(TRAINING_DATA_FILE_PATH, '')
-parser.parse()
+for R in R_VALUES:
+    parser = EventFileParser(TRAINING_DATA_FILE_PATH, '', R=R)
+    parser.parse()
+    # data is a numpy 2d array
+    bg_events_array = np.array(parser.all_events['background'])
+    file_name = './Data/Parsed_Data/bg_R{}'.format(R)
+    np.save(file_name, bg_events_array)
+    sig_events_array = np.array(parser.all_events['signal'])
+    file_name = './Data/Parsed_Data/sig_R{}'.format(R)
+    np.save(file_name, sig_events_array)
 
-# a numpy 2d array
-bg_events_array = np.array(parser.all_events['background'])
-file_name = './Data/Parsed_Data/bg'
-np.save(file_name, bg_events_array)
-sig_events_array = np.array(parser.all_events['signal'])
-file_name = './Data/Parsed_Data/sig'
-np.save(file_name, sig_events_array)
-
-print("Done")
-
-
+    print("Done")

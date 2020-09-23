@@ -16,7 +16,7 @@ class Event:
     Contains methods to calculate all supported observables given a list of jets.
     """
 
-    def __init__(self, jets, index=-1, box=-1, is_signal=False):
+    def __init__(self, jets, index=-1, box=-1, is_signal=False, R=1.0):
         """
         Creates an event with all the supported observables calculated.
         :param jets: A list of the jets in the event.
@@ -25,6 +25,7 @@ class Event:
         self.index = index
         self.box = box
         self.is_signal = is_signal
+        self.R = R
 
     @cached_property
     def jets_cart(self):
@@ -199,7 +200,7 @@ class Event:
         return list(tau)
 
     @cached_property
-    def nsubjettiness(self, R=1.0, max_tau=4):
+    def nsubjettiness(self, max_tau=4):
         """
         Given a list of an event's jets calculates their subjettiness.
         :param R: Anti-kt R parameter as needed for pyjet cluster function
@@ -207,7 +208,7 @@ class Event:
         :return: An array of arrays of jets subjettiness from the first jet to the last. i.e:
         [[jet1_tau1, jet1_tau2, ...], [jet2_tau1, jet2_tau2, ...], ...]
         """
-        return [self.jet_nsubjettiness(jet, R, max_tau) for jet in self.jets]
+        return [self.jet_nsubjettiness(jet, self.R, max_tau) for jet in self.jets]
 
     @cached_property
     def all_tau21(self):
@@ -230,8 +231,9 @@ class Event:
         """
         :return: array containing: mjj, nj, m_tot, first 2 tau21
         """
-        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2]
-
+        ## return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
+        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] +  \
+               self.all_tau21[:2]
 
     # TODO: Add more observables
     # TODO: Sanity tests
