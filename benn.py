@@ -72,7 +72,7 @@ def main():
         for R in R_VALUES:
             full_data_name = "R" + str(R)
             create_partial_data_set(full_data_name, DATA_PATH, EXPERIMENT_NAMES[i], EXPERIMENT_OBSERVABLES[i],
-                                    EXPERIMENT_MJJ_TRANSLATION[i])
+                                    OBS_DICT_ITERATION_DIFFERENT_R, EXPERIMENT_MJJ_TRANSLATION[i])
 
 
 if __name__ == "__main__":
