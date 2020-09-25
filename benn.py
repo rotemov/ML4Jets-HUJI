@@ -57,9 +57,7 @@ def create_full_data(path):
 def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list, obs_dict, sig_mjj_translation=0):
     bg = np.load(BG_FILE_FORMAT.format(data_path, full_data_name))
     sig = np.load(SIG_FILE_FORMAT.format(data_path, full_data_name))
-    idx = []
-    for obs_name in obs_list:
-        idx += [obs_dict[obs_name]]
+    idx = [obs_dict[obs_name] for obs_name in obs_list]
     new_sig = sig[:, idx]
     new_bg = bg[:, idx]
     if "mjj" in obs_list and "mjj" in obs_dict.keys():
