@@ -18,7 +18,7 @@ OBS_DICT_ITERATION_1 = {
 
 OBS_DICT_ITERATION_DIFFERENT_R = {
     'mjj': 0, "nj": 1, "mtot": 2, "m1": 3, "m2": 4, "m1_minus_m2": 5, "lead_pt": 6,
-    "ht":7, "mht": 8, "tau21_1": 9, "tau21_2": 10
+    "ht": 7, "mht": 8, "tau21_1": 9, "tau21_2": 10
 }
 
 EXPERIMENT_NAMES = ["mjj", "anode", "salad", "all", "all_mjj-translation_100", "all_mjj-translation_1000",
@@ -26,7 +26,7 @@ EXPERIMENT_NAMES = ["mjj", "anode", "salad", "all", "all_mjj-translation_100", "
                     "mjj_m1minusm2"]
 EXPERIMENT_OBSERVABLES = [
     ["mjj"],
-    ["m1", "m1_minus_m2", "tau21_1", "tau_21_2"],
+    ["m1", "m1_minus_m2", "tau21_1", "tau21_2"],
     ["m1", "m2", "tau21_1", "tau21_2"],
     ['mjj', "nj", "mtot", "m1", "m2", "m1_minus_m2", "lead_pt", "ht", "mht", "tau21_1", "tau21_2"],
     ['mjj', "nj", "mtot", "m1", "m2", "m1_minus_m2", "lead_pt", "ht", "mht", "tau21_1", "tau21_2"],
