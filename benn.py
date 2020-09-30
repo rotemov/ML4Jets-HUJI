@@ -49,7 +49,7 @@ def create_full_data(path):
         file_name = '{}bg_R{}'.format(path, R)
         np.save(file_name, bg_events_array)
         sig_events_array = np.array(parser.all_events['signal'])
-        file_name = 'sig_R{}'.format(path, R)
+        file_name = '{}sig_R{}'.format(path, R)
         np.save(file_name, sig_events_array)
         print("Data sets created")
 
