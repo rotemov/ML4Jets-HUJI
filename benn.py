@@ -5,7 +5,7 @@ import numpy as np
 File the data was created from.
 """
 
-R_VALUES = 0.4, 0.6, 0.8, 1.0
+R_VALUES = [0.4, 1.0]
 
 TRAINING_DATA_FILE_PATH = './Data/events_anomalydetection.h5'
 
@@ -63,8 +63,8 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
     if "mjj" in obs_list and "mjj" in obs_dict.keys():
         sig[:, 0] += sig_mjj_translation
     name = full_data_name + "_" + experiment_name
-    np.save(BG_FILE_FORMAT.format(data_path, name), new_sig)
-    np.save(SIG_FILE_FORMAT.format(data_path, name), new_bg)
+    np.save(BG_FILE_FORMAT.format(data_path, name), new_bg)
+    np.save(SIG_FILE_FORMAT.format(data_path, name), new_sig)
 
 
 def main():
