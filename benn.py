@@ -1,5 +1,6 @@
 from event_file_parser import EventFileParser
 import numpy as np
+import os
 
 """
 File the data was created from.
@@ -76,5 +77,6 @@ def main():
 
 
 if __name__ == "__main__":
+    print(os.getcwd())
     main()
 
