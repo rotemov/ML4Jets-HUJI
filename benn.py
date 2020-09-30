@@ -69,6 +69,7 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
 
 
 def main():
+    create_full_data(DATA_PATH)
     for i in range(len(EXPERIMENT_NAMES)):
         for R in R_VALUES:
             full_data_name = "R" + str(R)
