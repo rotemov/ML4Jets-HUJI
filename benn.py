@@ -8,11 +8,11 @@ File the data was created from.
 
 R_VALUES = [0.4, 1.0]
 
-TRAINING_DATA_FILE_PATH = './Data/events_anomalydetection.h5'
+TRAINING_DATA_FILE_PATH = '/usr/people/snirgaz/rotemov/Projects/ML4Jets-HUJI/Data/events_anomalydetection.h5'
 
 SIG_FILE_FORMAT = "{}sig_{}.npy"
 BG_FILE_FORMAT = "{}bg_{}.npy"
-DATA_PATH = "./Data/Parsed_Data/"
+DATA_PATH = "/usr/people/snirgaz/rotemov/Projects/ML4Jets-HUJI/Data/Parsed_Data/"
 OBS_DICT_ITERATION_1 = {
     'mjj': 0, "nj": 1, "mtot": 2, "m1": 3, "m2": 4, "tau21_1": 5, "tau21_2": 6
 }
