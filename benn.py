@@ -62,7 +62,7 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
     new_sig = sig[:, idx]
     new_bg = bg[:, idx]
     if "mjj" in obs_list and "mjj" in obs_dict.keys():
-        sig[:, 0] += sig_mjj_translation
+        new_sig[:, 0] += sig_mjj_translation
     name = full_data_name + "_" + experiment_name
     np.save(BG_FILE_FORMAT.format(data_path, name), new_bg)
     np.save(SIG_FILE_FORMAT.format(data_path, name), new_sig)
