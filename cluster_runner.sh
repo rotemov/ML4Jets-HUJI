@@ -10,6 +10,5 @@
 #SBATCH -p yonitq
 
 source /opt/anaconda3/bin/activate ML4Jets
-cd /usr/people/snirgaz/rotemov/Projects/ML4Jets-HUJI
 python benn.py
 echo "Done"
