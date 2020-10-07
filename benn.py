@@ -8,7 +8,7 @@ File the data was created from.
 
 R_VALUES = [0.4, 1.0]
 
-TRAINING_DATA_FILE_PATH = '/usr/people/snirgaz/rotemov/Projects/ML4Jets-HUJI/Data/events_anomalydetection.h5'
+TRAINING_DATA_FILE_PATH = '/home/data/rotemov/Projects/ML4Jets-HUJI/Data/events_anomalydetection.h5'
 
 SIG_FILE_FORMAT = "{}sig_{}.npy"
 BG_FILE_FORMAT = "{}bg_{}.npy"
