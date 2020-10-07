@@ -6,7 +6,7 @@
 #SBATCH --mem=100G
 #SBATCH --mail-type=END
 #SBATCH --mail-user=rotem.ovadia@mail.huji.ac.il
-#SBATCH -A rotemov-account
+#SBATCH -A yonit-account
 #SBATCH -p yonitq
 
 source /opt/anaconda3/bin/activate ML4Jets
