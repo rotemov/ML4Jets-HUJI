@@ -3,7 +3,7 @@ import numpy as np
 from pyjet import cluster, DTYPE_PTEPM
 import pandas as pd
 import math
-
+import gc
 from tqdm import tqdm
 
 from event import Event
@@ -79,6 +79,7 @@ class EventFileParser:
                 sjets = [SerializablePseudoJet(j) for j in jets]
                 event = Event(sjets, R=self.R)
                 self.all_events[mytype] += [event.get_as_output()]
+                gc.collect()
                 pass
             # print("Chunk " + str(k) + " complete")
 

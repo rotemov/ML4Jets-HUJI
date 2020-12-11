@@ -43,16 +43,18 @@ EXPERIMENT_MJJ_TRANSLATION = [0, 0, 0, 0, 10**2, 10**3, 5*10**3, 10**4, 0, 0, 0]
 
 def create_full_data(path):
     for R in R_VALUES:
+        print("Starting parse R{}".format(R))
         parser = EventFileParser(TRAINING_DATA_FILE_PATH, '', R=R)
         parser.parse()
+        print("Parsed R{}".format(R))
         # data is a numpy 2d array
         bg_events_array = np.array(parser.all_events['background'])
-        file_name = '{}bg_R{}'.format(path, R)
+        file_name = '{}bg_partons_R{}'.format(path, R)
         np.save(file_name, bg_events_array)
         sig_events_array = np.array(parser.all_events['signal'])
-        file_name = '{}sig_R{}'.format(path, R)
+        file_name = '{}sig_partons_R{}'.format(path, R)
         np.save(file_name, sig_events_array)
-        print("Data sets created")
+        print("Data sets creates R{}".format(R))
 
 
 def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list, obs_dict, sig_mjj_translation=0):
@@ -69,15 +71,16 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
 
 
 def main():
-    create_full_data(DATA_PATH)
+    create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
+    """
     for i in range(len(EXPERIMENT_NAMES)):
         for R in R_VALUES:
             full_data_name = "R" + str(R)
             create_partial_data_set(full_data_name, DATA_PATH, EXPERIMENT_NAMES[i], EXPERIMENT_OBSERVABLES[i],
                                     OBS_DICT_ITERATION_DIFFERENT_R, EXPERIMENT_MJJ_TRANSLATION[i])
+    """
 
 
 if __name__ == "__main__":
-    print(os.getcwd())
     main()
 

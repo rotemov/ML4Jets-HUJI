@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 import numpy as np
 import itertools
-
+import gc
 from pyjet import cluster
 from cached_property import cached_property
 
@@ -47,10 +47,10 @@ class Event:
             px += jet.px
             py += jet.py
             pz += jet.pz
-        if (e**2 - px**2 - py**2 - pz**2) < 0:
+        if (e ** 2 - px ** 2 - py ** 2 - pz ** 2) < 0:
             # We get a rounding error here, the number is just very close to zero
             return 0
-        return (e**2 - px**2 - py**2 - pz**2)**0.5
+        return (e ** 2 - px ** 2 - py ** 2 - pz ** 2) ** 0.5
 
     @cached_property
     def m_tot(self):
@@ -216,7 +216,8 @@ class Event:
         Gets the tau21 of all of the jets
         :return: The tau21 of all of the jets
         """
-        return [nsubjetiness[1]/nsubjetiness[0] for nsubjetiness in self.nsubjettiness]
+        return [nsubjetiness[1] / nsubjetiness[0] for nsubjetiness in self.nsubjettiness]
+
     """
     def __dict__(self):
         return {"index": self.index,
@@ -232,8 +233,34 @@ class Event:
         :return: array containing: mjj, nj, m_tot, first 2 tau21
         """
         ## return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
-        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] +  \
-               self.all_tau21[:2]
+        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
+               self.all_tau21[:2] + self.parton_data
+
+    @cached_property
+    def parton_data(self, n_jets=4, n_partons=10):
+        """
+        Returns a list of all the jets and their partons going by most energetic.
+        @param n_jets: The number of jets to look at
+        @param n_partons: The amount of partons to take from each jet
+        """
+        data_per_parton = 3
+        coordinates = []
+        labels = []
+        for i, jet in enumerate(self.jets[:n_jets]):
+            jet_coordinates = []
+            for parton in jet.exclusive_subjets_up_to(n_partons):
+                parton_data = [parton.eta - jet.eta, parton.phi - jet.phi, parton.pt]
+                jet_coordinates += parton_data
+                labels.append(i)
+            null_partons = n_partons - len(labels)
+            jet_coordinates += [0] * null_partons * data_per_parton
+            labels += [-1] * null_partons
+            coordinates += jet_coordinates
+            gc.collect()
+        null_jets = int(n_jets - (len(coordinates) / (n_partons * data_per_parton)))
+        coordinates += [0] * null_jets * n_partons * data_per_parton
+        labels += [-1] * null_jets * n_partons
+        return coordinates + labels
 
     # TODO: Add more observables
     # TODO: Sanity tests
