@@ -243,11 +243,13 @@ class Event:
         @param n_jets: The number of jets to look at
         @param n_partons: The amount of partons to take from each jet
         """
-        data_per_parton = 3
+        data_per_parton = 4
         coordinates = []
         labels = []
         for i, jet in enumerate(self.jets[:n_jets]):
             jet_coordinates = []
+            print(jet.constituents[0:4])
+            print(jet.constituents[0].tolist())
             for parton in jet.constituents[:n_partons]:
                 parton_data = [parton[0], parton[1] - jet.eta, parton[2] - jet.phi, parton[3]]  # pt, delta eta, delta phi, mass
                 jet_coordinates += parton_data
