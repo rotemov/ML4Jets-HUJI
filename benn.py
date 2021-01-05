@@ -9,11 +9,13 @@ File the data was created from.
 R_VALUES = [0.4, 1.0]
 
 TRAINING_DATA_FILE_PATH = 'Data/events_anomalydetection.h5'
-CSV_FILE_PATH = "obs_parton_R{}.csv"
 
 SIG_FILE_FORMAT = "{}sig_{}.npy"
 BG_FILE_FORMAT = "{}bg_{}.npy"
 DATA_PATH = "Data/Parsed_Data/"
+
+CSV_FILE_PATH = "{}obs_parton_R{}.csv".format(DATA_PATH, "{}")
+
 OBS_DICT_ITERATION_1 = {
     'mjj': 0, "nj": 1, "mtot": 2, "m1": 3, "m2": 4, "tau21_1": 5, "tau21_2": 6
 }
@@ -39,7 +41,7 @@ EXPERIMENT_OBSERVABLES = [
     ["mjj", "m1", "m1_minus_m2"],
     ["mjj", "m1_minus_m2"]
 ]
-EXPERIMENT_MJJ_TRANSLATION = [0, 0, 0, 0, 10**2, 10**3, 5*10**3, 10**4, 0, 0, 0]
+EXPERIMENT_MJJ_TRANSLATION = [0, 0, 0, 0, 10 ** 2, 10 ** 3, 5 * 10 ** 3, 10 ** 4, 0, 0, 0]
 
 
 def create_full_data(path):
@@ -72,9 +74,9 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
 
 
 def main():
-    R=1.0
+    R = 1.0
     p = EventFileParser(TRAINING_DATA_FILE_PATH, CSV_FILE_PATH.format(R), R=R)
-    #create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
+    # create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
     """
     for i in range(len(EXPERIMENT_NAMES)):
         for R in R_VALUES:
@@ -86,4 +88,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
