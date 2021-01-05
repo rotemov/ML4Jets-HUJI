@@ -5,7 +5,7 @@ import pandas as pd
 import math
 import gc
 from tqdm import tqdm
-
+import csv
 from event import Event
 import jsonpickle
 from serializable_psuedo_jet import SerializablePseudoJet
@@ -19,7 +19,7 @@ class EventFileParser:
     development set.
     dev set should include ~100k signal ~1m bg.
     """
-    def __init__(self, file_name, json_name, chunk_size=512, total_size=1100000, R=1.0, ptmin=20):
+    def __init__(self, file_name, csv_name, chunk_size=512, total_size=1100000, R=1.0, ptmin=20):
         """
         Creates an EventFileParser for the format of the files in the LHC olympics 2020
         :param file_name: the path to the file
@@ -30,7 +30,7 @@ class EventFileParser:
         self.chunksize = chunk_size
         self.total_size = total_size
         self.iterations = int(math.ceil(total_size / chunk_size))
-        self.json_name = json_name
+        self.csv_name = csv_name
         self.R = R
         self.ptmin = ptmin
         self.all_events = {'background' : [], 'signal' : []}
@@ -57,30 +57,33 @@ class EventFileParser:
         Parses the file into a list of PsuedoJets of the events saved in the field alljets
         :return: None
         """
-        for k in tqdm(range(self.iterations)):
-            raw_events = self.file.next()
-            n_events = np.shape(raw_events)[0]
-            for index, event in raw_events.iterrows():
-                issignal = (int(event[2100]) == 1)
-                if issignal:
-                    mytype = 'signal'
-                else:
-                    mytype = 'background'
-                pseudojets_input = np.zeros(len([x for x in event[::3] if x > 0]), dtype=DTYPE_PTEPM)
-                for j in range(700):
-                    if (event[j * 3] > 0):
-                        pseudojets_input[j]['pT'] = event[j * 3]
-                        pseudojets_input[j]['eta'] = event[j * 3 + 1]
-                        pseudojets_input[j]['phi'] = event[j * 3 + 2]
+        with open(self.csv_name, "w") as save_file:
+            writer = csv.writer(save_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for k in tqdm(range(self.iterations)):
+                raw_events = self.file.next()
+                n_events = np.shape(raw_events)[0]
+                for index, event in raw_events.iterrows():
+                    issignal = (int(event[2100]) == 1)
+                    if issignal:
+                        mytype = 'signal'
+                    else:
+                        mytype = 'background'
+                    pseudojets_input = np.zeros(len([x for x in event[::3] if x > 0]), dtype=DTYPE_PTEPM)
+                    for j in range(700):
+                        if (event[j * 3] > 0):
+                            pseudojets_input[j]['pT'] = event[j * 3]
+                            pseudojets_input[j]['eta'] = event[j * 3 + 1]
+                            pseudojets_input[j]['phi'] = event[j * 3 + 2]
+                            pass
                         pass
+                    sequence = cluster(pseudojets_input, R=self.R, p=-1)
+                    jets = sequence.inclusive_jets(ptmin=self.ptmin)
+                    sjets = [SerializablePseudoJet(j) for j in jets]
+                    event = Event(sjets, R=self.R, is_signal=issignal)
+                    # self.all_events[mytype] += [event.get_as_output()]
+                    writer.writerow(event.get_as_output())
+                    gc.collect()
                     pass
-                sequence = cluster(pseudojets_input, R=self.R, p=-1)
-                jets = sequence.inclusive_jets(ptmin=self.ptmin)
-                sjets = [SerializablePseudoJet(j) for j in jets]
-                event = Event(sjets, R=self.R)
-                self.all_events[mytype] += [event.get_as_output()]
-                gc.collect()
-                pass
             # print("Chunk " + str(k) + " complete")
 
 

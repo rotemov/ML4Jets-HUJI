@@ -234,7 +234,7 @@ class Event:
         """
         ## return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
         return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
-               self.all_tau21[:2] + self.parton_data
+               self.all_tau21[:2] + self.parton_data + [int(self.is_signal)]
 
     @cached_property
     def parton_data(self, n_jets=4, n_partons=10):

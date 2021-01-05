@@ -9,6 +9,7 @@ File the data was created from.
 R_VALUES = [0.4, 1.0]
 
 TRAINING_DATA_FILE_PATH = 'Data/events_anomalydetection.h5'
+CSV_FILE_PATH = "obs_parton_R{}.csv"
 
 SIG_FILE_FORMAT = "{}sig_{}.npy"
 BG_FILE_FORMAT = "{}bg_{}.npy"
@@ -71,7 +72,9 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
 
 
 def main():
-    create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
+    R=1.0
+    p = EventFileParser(TRAINING_DATA_FILE_PATH, CSV_FILE_PATH.format(R), R=R)
+    #create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
     """
     for i in range(len(EXPERIMENT_NAMES)):
         for R in R_VALUES:
