@@ -248,10 +248,8 @@ class Event:
         labels = []
         for i, jet in enumerate(self.jets[:n_jets]):
             jet_coordinates = []
-            print(jet.constituents[0:4])
-            print(jet.constituents[0].tolist())
             for parton in jet.constituents[:n_partons]:
-                parton_data = [parton[0], parton[1] - jet.eta, parton[2] - jet.phi, parton[3]]  # pt, delta eta, delta phi, mass
+                parton_data = [parton[0], parton[1] - jet.eta, (parton[2] - jet.phi)%(2*np.pi), parton[3]]  # pt, delta eta, delta phi, mass
                 jet_coordinates += parton_data
                 labels.append(i)
             null_partons = n_partons - len(labels)
