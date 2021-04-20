@@ -77,6 +77,7 @@ def main():
     R = 1.0
     for R in [1.0, 0.4, 0.7]:
         p = EventFileParser(TRAINING_DATA_FILE_PATH, CSV_FILE_PATH.format(R), R=R)
+        p.parse()
     # create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
     """
     for i in range(len(EXPERIMENT_NAMES)):

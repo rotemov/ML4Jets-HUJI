@@ -251,8 +251,9 @@ class Event:
             jet_coordinates = [jet.pt, jet.eta, jet.phi, Event.invariant_mass([jet])]  # jet pt, eta, phi, mass
             print(jet.constituents[0:4])
             print(jet.constituents[0].tolist())
+            jet_coordinates = []
             for parton in jet.constituents[:n_partons]:
-                parton_data = [parton[0], parton[1] - jet.eta, parton[2] - jet.phi, parton[3]]  # pt, delta eta, delta phi, mass
+                parton_data = [parton[0], parton[1] - jet.eta, (parton[2] - jet.phi)%(2*np.pi), parton[3]]  # pt, delta eta, delta phi, mass
                 jet_coordinates += parton_data
                 labels.append(i)
             null_partons = n_partons - len(labels)
