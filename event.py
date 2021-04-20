@@ -232,12 +232,13 @@ class Event:
         """
         :return: array containing: mjj, nj, m_tot, first 2 tau21
         """
-        ## return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
-        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
-               self.all_tau21[:2] + self.parton_data + [int(self.is_signal)]
+        # return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
+        return self.parton_data + \
+               [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
+               self.all_tau21[:4] + [int(self.is_signal)]
 
     @cached_property
-    def parton_data(self, n_jets=4, n_partons=10):
+    def parton_data(self, n_jets=4, n_partons=40):
         """
         Returns a list of all the jets and their partons going by most energetic.
         @param n_jets: The number of jets to look at
@@ -247,7 +248,7 @@ class Event:
         coordinates = []
         labels = []
         for i, jet in enumerate(self.jets[:n_jets]):
-            jet_coordinates = []
+            jet_coordinates = [jet.pt, jet.eta, jet.phi, Event.invariant_mass([jet])]  # jet pt, eta, phi, mass
             print(jet.constituents[0:4])
             print(jet.constituents[0].tolist())
             for parton in jet.constituents[:n_partons]:
@@ -259,10 +260,10 @@ class Event:
             labels += [-1] * null_partons
             coordinates += jet_coordinates
             gc.collect()
-        null_jets = int(n_jets - (len(coordinates) / (n_partons * data_per_parton)))
+        null_jets = int(n_jets - (len(coordinates) / ((n_partons + 1) * data_per_parton)))
         coordinates += [0] * null_jets * n_partons * data_per_parton
         labels += [-1] * null_jets * n_partons
-        return coordinates + labels
+        return coordinates  # + labels
 
     # TODO: Add more observables
     # TODO: Sanity tests

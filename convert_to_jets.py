@@ -79,7 +79,9 @@ def main():
     hf.close()
     print(datetime.now())
 
-main()
+
+if __name__ == "__main__":
+    main()
 
 
 
