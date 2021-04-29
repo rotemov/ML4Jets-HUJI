@@ -93,12 +93,14 @@ def main():
 
 def reorganize_data():
     num_events = 1100288
-    num_chunks = 106
-    chunk_size = round(num_events / num_chunks)
+    num_chunks = 10787
+    # num_chunks = 106
+    chunk_size = int(num_events / num_chunks)
     hf = h5.File('{}data_truthbit_mjj_tau21.h5'.format(DATA_PATH), 'w')
     mjj_tau21_cols = [176, 185]
     mjj_tau21 = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_cols)
-    hf.create_dataset('dataset', compression="gzip", compression_opts=9, maxshape=(2103, num_events))
+    hf.create_dataset('chunked', compression="gzip", compression_opts=9, maxshape=(2103, num_events),
+                      chunk_size=(2103, chunk_size))
     for i in tqdm(range(num_chunks)):
         start = chunk_size * i
         stop = chunk_size * (i+1)
