@@ -3,6 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 import h5py as h5
+from tqdm import tqdm
 
 """
 File the data was created from.
@@ -97,8 +98,8 @@ def reorganize_data():
     hf = h5.File('{}data_truthbit_mjj_tau21.h5'.format(DATA_PATH), 'w')
     mjj_tau21_cols = [176, 185]
     mjj_tau21 = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_cols)
-    hf.create_dataset('dataset', compression="gzip", compression_opts=9, max_size=(2103, num_events))
-    for i in range(num_chunks):
+    hf.create_dataset('dataset', compression="gzip", compression_opts=9, maxshape=(2103, num_events))
+    for i in tqdm(range(num_chunks)):
         start = chunk_size * i
         stop = chunk_size * (i+1)
         df = pd.read_hdf(TRAINING_DATA_FILE_PATH, start=start, stop=stop)
