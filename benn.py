@@ -3,9 +3,11 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matplotlib
+matplotlib.use('Agg')
+
 from matplotlib import pyplot as plt
 
-matplotlib.use('Agg')
+
 """
 File the data was created from.
 """
