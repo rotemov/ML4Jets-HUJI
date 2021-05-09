@@ -152,9 +152,7 @@ def plot_2d_histograms(mjj, tau21, prefix):
             plt.close()
 
 
-if __name__ == "__main__":
-    reorganize_data()
-    """
+def plot_all_histograms():
     mjj_tau21_sig_cols = [176, 185, 189]
     mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
     sig_mask = mjj_tau21_sig[:, 2] == 1
@@ -165,4 +163,7 @@ if __name__ == "__main__":
     plot_2d_histograms(sig[:, 0], sig[:, 1], "sig")
     plot_2d_histograms(bg[:, 0], bg[:, 1], "bg")
     plot_2d_histograms(mjj_tau21_sig[:, 0], mjj_tau21_sig[:, 1], "combined")
-    """
+
+
+if __name__ == "__main__":
+    reorganize_data()
