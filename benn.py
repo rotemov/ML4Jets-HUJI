@@ -2,8 +2,10 @@ from event_file_parser import EventFileParser
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import matplotlib
 from matplotlib import pyplot as plt
 
+matplotlib.use('Agg')
 """
 File the data was created from.
 """
