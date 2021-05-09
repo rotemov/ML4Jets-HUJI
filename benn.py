@@ -1,9 +1,8 @@
 from event_file_parser import EventFileParser
 import numpy as np
-import os
 import pandas as pd
-import h5py as h5
 from tqdm import tqdm
+from matplotlib import pyplot as plt
 
 """
 File the data was created from.
@@ -110,6 +109,37 @@ def reorganize_data():
         store.append('data', df)
     store.close()
 
+"""
+def plot_histograms(obs, prefix):
+    n_bins = [10, 20, 30]
+    fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
+    for i, n in enumerate(n_bins):
+        axs[i].hist(obs, n_bins=n)
+"""
+
+
+def plot_histograms(obs, sig_mask, prefix, xlabel):
+    sig = obs[sig_mask]
+    bg = obs[~sig_mask]
+    fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
+    for i, n in enumerate([10, 20, 30]):
+        plt.figure()
+        # combined = trim_outliers(np.hstack((sig[:, i], bg[:, i])), trim_percent)
+        bins = np.histogram(obs, bins=n)[1]
+        axs[i].hist(obs, bins=bins, label="combined", color="purple", log=True)
+        axs[i].hist(bg, color="b", label="bg", log=True, bins=bins)
+        axs[i].hist(sig, color="r", label="sig", log=True, bins=bins)
+        axs[i].legend()
+        axs[i].title("{}, N={}".format(prefix, n))
+        axs[i].xlabel(xlabel)
+        axs[i].ylabel("Num events")
+    fig.savefig("{}histograms/{}.png".format(DATA_PATH, prefix))
+
 
 if __name__ == "__main__":
-    reorganize_data()
+    mjj_tau21_sig_cols = [176, 185, 189]
+    mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
+    sig_mask = mjj_tau21_sig[:, 2] == 1
+    plot_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$")
+    plot_histograms(mjj_tau21_sig[:, 1], sig_mask, "tau21", "$\\tau_{21}$")
+    # reorganize_data()
