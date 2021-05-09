@@ -119,7 +119,7 @@ def reorganize_data():
     combined.close()
 
 
-def plot_1d_histograms(obs, sig_mask, prefix, xlabel):
+def plot_1d_histograms(obs, sig_mask, prefix, xlabel, log=False):
     sig = obs[sig_mask]
     bg = obs[~sig_mask]
     # fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
@@ -128,6 +128,9 @@ def plot_1d_histograms(obs, sig_mask, prefix, xlabel):
         # combined = trim_outliers(np.hstack((sig[:, i], bg[:, i])), trim_percent)
         plt.figure()
         bins = np.histogram(obs, bins=n)[1]
+        if log:
+            bins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+            plt.xscale('log')
         plt.hist(obs, bins=bins, label="combined", color="purple", log=True)
         plt.hist(bg, color="b", label="bg", log=True, bins=bins)
         plt.hist(sig, color="r", label="sig", log=True, bins=bins)
@@ -144,10 +147,13 @@ def plot_2d_histograms(mjj, tau21, prefix):
     for n_mjj in n_bins:
         for n_tau21 in n_bins:
             plt.figure()
-            plt.hist2d(mjj, tau21, bins=[n_mjj, n_tau21])
+            plt.xscale('log')
+            _, bins_mjj, bins_tau21 = np.histogram2d(mjj, tau21, [n_mjj, n_tau21])
+            bins = np.logspace(np.log10(bins_mjj[0]), np.log10(bins_mjj[-1]), len(bins))
+            plt.hist2d(mjj, tau21, bins=[bins_mjj, bins_tau21])
             plt.title("{}, Nmjj={}, Ntau21={}".format(prefix, n_mjj, n_tau21))
-            plt.xlabel("$M_{jj}$")
-            plt.ylabel("$$\\tau_{21}$")
+            plt.xlabel("$M_{jj}[GeV]$")
+            plt.ylabel("$\\tau_{21}$")
             plt.savefig("{}histograms/2d_{}_nmjj{}_ntau21{}.png".format(DATA_PATH, prefix, n_mjj, n_tau21))
             plt.close()
 
@@ -156,7 +162,7 @@ def plot_all_histograms():
     mjj_tau21_sig_cols = [176, 185, 189]
     mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
     sig_mask = mjj_tau21_sig[:, 2] == 1
-    plot_1d_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$")
+    plot_1d_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$", log=True)
     plot_1d_histograms(mjj_tau21_sig[:, 1], sig_mask, "tau21", "$\\tau_{21}$")
     sig = mjj_tau21_sig[sig_mask]
     bg = mjj_tau21_sig[~sig_mask]
@@ -166,4 +172,5 @@ def plot_all_histograms():
 
 
 if __name__ == "__main__":
-    reorganize_data()
+    plot_all_histograms()
+    #reorganize_data()
