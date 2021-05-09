@@ -109,7 +109,7 @@ def reorganize_data():
         df = pd.read_hdf(TRAINING_DATA_FILE_PATH, start=start, stop=stop)
         df["mjj"] = mjj_tau21.values[start:stop, 0]
         df["tau21"] = mjj_tau21.values[start:stop, 1]
-        mask = df['2100'] == 0
+        mask = df[2100] == 0
         if n_bg < 5*10**5:
             bg_only.append('data', df[mask])
             combined.append('data', df[~mask])
@@ -153,6 +153,8 @@ def plot_2d_histograms(mjj, tau21, prefix):
 
 
 if __name__ == "__main__":
+    reorganize_data()
+    """
     mjj_tau21_sig_cols = [176, 185, 189]
     mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
     sig_mask = mjj_tau21_sig[:, 2] == 1
@@ -163,4 +165,4 @@ if __name__ == "__main__":
     plot_2d_histograms(sig[:, 0], sig[:, 1], "sig")
     plot_2d_histograms(bg[:, 0], bg[:, 1], "bg")
     plot_2d_histograms(mjj_tau21_sig[:, 0], mjj_tau21_sig[:, 1], "combined")
-    reorganize_data()
+    """
