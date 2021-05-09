@@ -106,7 +106,7 @@ def reorganize_data():
         df = pd.read_hdf(TRAINING_DATA_FILE_PATH, start=start, stop=stop)
         df["mjj"] = mjj_tau21.values[start:stop, 0]
         df["tau21"] = mjj_tau21.values[start:stop, 1]
-        hf[start:stop] = df.values
+        hf[start:stop, :] = df.values
     hf.close()
 
 
