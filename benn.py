@@ -93,29 +93,26 @@ def main():
 def reorganize_data():
     num_events = 1100288
     num_chunks = 10787
-    # num_chunks = 106
     chunk_size = int(num_events / num_chunks)
-    store = pd.HDFStore('{}data_truthbit_mjj_tau21.h5'.format(DATA_PATH), complib='zlib')
-    # hf = h5.File('{}data_truthbit_mjj_tau21.h5'.format(DATA_PATH), 'w')
+    bg_only = pd.HDFStore('{}bg_data_truthbit_mjj_tau21.h5'.format(DATA_PATH), complib='zlib')
+    combined = pd.HDFStore('{}combined_data_truthbit_mjj_tau21.h5'.format(DATA_PATH), complib='zlib')
     mjj_tau21_cols = [176, 185]
     mjj_tau21 = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_cols)
-    # hf.create_dataset('chunked', shape=(2103, num_events), compression="gzip", compression_opts=9, chunks=(2103, chunk_size))
+    n_bg = 0
     for i in tqdm(range(num_chunks)):
         start = chunk_size * i
         stop = chunk_size * (i+1)
         df = pd.read_hdf(TRAINING_DATA_FILE_PATH, start=start, stop=stop)
         df["mjj"] = mjj_tau21.values[start:stop, 0]
         df["tau21"] = mjj_tau21.values[start:stop, 1]
-        store.append('data', df)
-    store.close()
-
-"""
-def plot_histograms(obs, prefix):
-    n_bins = [10, 20, 30]
-    fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
-    for i, n in enumerate(n_bins):
-        axs[i].hist(obs, n_bins=n)
-"""
+        mask = df['2100'] == 0
+        if n_bg < 5*10**5:
+            bg_only.append('data', df[mask])
+            combined.append('data', df[~mask])
+        else:
+            combined.append('data', df)
+    bg_only.close()
+    combined.close()
 
 
 def plot_1d_histograms(obs, sig_mask, prefix, xlabel):
@@ -162,4 +159,4 @@ if __name__ == "__main__":
     plot_2d_histograms(sig[:, 0], sig[:, 1], "sig")
     plot_2d_histograms(bg[:, 0], bg[:, 1], "bg")
     plot_2d_histograms(mjj_tau21_sig[:, 0], mjj_tau21_sig[:, 1], "combined")
-    # reorganize_data()
+    reorganize_data()
