@@ -118,28 +118,48 @@ def plot_histograms(obs, prefix):
 """
 
 
-def plot_histograms(obs, sig_mask, prefix, xlabel):
+def plot_1d_histograms(obs, sig_mask, prefix, xlabel):
     sig = obs[sig_mask]
     bg = obs[~sig_mask]
-    fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
-    for i, n in enumerate([10, 20, 30]):
-        plt.figure()
+    # fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
+    n_bins = [10, 20, 30]
+    for i, n in enumerate(n_bins):
         # combined = trim_outliers(np.hstack((sig[:, i], bg[:, i])), trim_percent)
+        plt.figure()
         bins = np.histogram(obs, bins=n)[1]
-        axs[i].hist(obs, bins=bins, label="combined", color="purple", log=True)
-        axs[i].hist(bg, color="b", label="bg", log=True, bins=bins)
-        axs[i].hist(sig, color="r", label="sig", log=True, bins=bins)
-        axs[i].legend()
-        axs[i].title("{}, N={}".format(prefix, n))
-        axs[i].xlabel(xlabel)
-        axs[i].ylabel("Num events")
-    fig.savefig("{}histograms/{}.png".format(DATA_PATH, prefix))
+        plt.hist(obs, bins=bins, label="combined", color="purple", log=True)
+        plt.hist(bg, color="b", label="bg", log=True, bins=bins)
+        plt.hist(sig, color="r", label="sig", log=True, bins=bins)
+        plt.legend()
+        plt.title("{}, N={}".format(prefix, n))
+        plt.xlabel(xlabel)
+        plt.ylabel("Num events")
+        plt.savefig("{}histograms/1d_{}_nbins{}.png".format(DATA_PATH, prefix, n))
+        plt.close()
+
+
+def plot_2d_histograms(mjj, tau21, prefix):
+    n_bins = [10, 20, 30]
+    for n_mjj in n_bins:
+        for n_tau21 in n_bins:
+            plt.figure()
+            plt.hist2d(mjj, tau21, bins=[n_mjj, n_tau21])
+            plt.title("{}, Nmjj={}, Ntau21={}".format(prefix, n_mjj, n_tau21))
+            plt.xlabel("$M_{jj}$")
+            plt.ylabel("$$\\tau_{21}$")
+            plt.savefig("{}histograms/2d_{}_nmjj{}_ntau21{}.png".format(DATA_PATH, prefix, n_mjj, n_tau21))
+            plt.close()
 
 
 if __name__ == "__main__":
     mjj_tau21_sig_cols = [176, 185, 189]
     mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
     sig_mask = mjj_tau21_sig[:, 2] == 1
-    plot_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$")
-    plot_histograms(mjj_tau21_sig[:, 1], sig_mask, "tau21", "$\\tau_{21}$")
+    plot_1d_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$")
+    plot_1d_histograms(mjj_tau21_sig[:, 1], sig_mask, "tau21", "$\\tau_{21}$")
+    sig = mjj_tau21_sig[sig_mask]
+    bg = mjj_tau21_sig[~sig_mask]
+    plot_2d_histograms(sig[:, 0], sig[:, 1], "sig")
+    plot_2d_histograms(bg[:, 0], bg[:, 1], "bg")
+    plot_2d_histograms(mjj_tau21_sig[:, 0], mjj_tau21_sig[:, 1], "combined")
     # reorganize_data()
