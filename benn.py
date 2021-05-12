@@ -4,7 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 import matplotlib
 matplotlib.use('Agg')
-
+import h5py
 from matplotlib import pyplot as plt
 
 
@@ -111,10 +111,11 @@ def reorganize_data():
         df["tau21"] = mjj_tau21.values[start:stop, 1]
         mask = df[2100] == 0
         if n_bg < 5*10**5:
-            bg_only.append('data', df[mask].values)
-            combined.append('data', df[~mask].values)
+            bg_only.append('data', df[mask])
+            combined.append('data', df[~mask])
+            n_bg += np.sum(mask)
         else:
-            combined.append('data', df.values)
+            combined.append('data', df)
     bg_only.close()
     combined.close()
 
