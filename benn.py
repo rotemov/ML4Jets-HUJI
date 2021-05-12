@@ -111,10 +111,10 @@ def reorganize_data():
         df["tau21"] = mjj_tau21.values[start:stop, 1]
         mask = df[2100] == 0
         if n_bg < 5*10**5:
-            bg_only.append('data', df[mask])
-            combined.append('data', df[~mask])
+            bg_only.append('data', df[mask].values)
+            combined.append('data', df[~mask].values)
         else:
-            combined.append('data', df)
+            combined.append('data', df.values)
     bg_only.close()
     combined.close()
 
@@ -172,5 +172,5 @@ def plot_all_histograms():
 
 
 if __name__ == "__main__":
+    reorganize_data()
     plot_all_histograms()
-    #reorganize_data()
