@@ -39,7 +39,7 @@ def get_jets_from_black_box(box_number, number_of_events=None, R=1.0, eta_cut=2.
     return events, events_combined
 
 
-def get_jets_from_training_data(number_of_events=None, R=1.0, eta_cut=2.5):
+def get_jets_from_training_data(number_of_events=None, R=1.0, eta_cut=2.5, file=TRAINING_DATA_FILE_PATH):
     """
     Parse the file grouped into signal and background into Event objects.
     Each event contains all jets relating to it (within the given eta cut).
@@ -53,7 +53,7 @@ def get_jets_from_training_data(number_of_events=None, R=1.0, eta_cut=2.5):
     :return: list of signal Events, list of background Events,
              and events_combined - the raw data from the file
     """
-    fnew = pd.read_hdf(TRAINING_DATA_FILE_PATH, stop=number_of_events)
+    fnew = pd.read_hdf(file, stop=number_of_events)
     events_combined = fnew.T
 
     signal_events = []

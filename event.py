@@ -142,26 +142,31 @@ class Event:
     @cached_property
     def mht(self, pt_cutoff=30, eta_cutoff=5):
         """
-        Calculates the missing HT observable of the event.
+        Calculates the missing HT observable of the event - the vector sum of the transverse momenta of all jets
         :param pt_cutoff: The cutoff pt
         :param eta_cutoff: The eta cutoff
         :return: The missing HT of an event
         """
         all_px = np.array([jet.px for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)])
         all_py = np.array([jet.py for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)])
-        return sum(np.square(all_px) + np.square(all_py)) ** 0.5
+        all_pz = np.array([jet.pz for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)])
+
+        sum_px = sum(all_px)
+        sum_py = sum(all_py)
+        sum_pz = sum(all_pz)
+
+        return (sum_px**2 + sum_py**2 + sum_pz**2) ** 0.5
 
     @cached_property
     def ht(self, pt_cutoff=30, eta_cutoff=2.5):
         """
-        Calculates the HT observable of the event.
+        Calculates the HT observable of the event - scalar sum of the pt of all jets
         :param pt_cutoff: The cutoff pt
         :param eta_cutoff: The eta cutoff
         :return: The HT of an event
         """
-        all_px = np.array([jet.px for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)])
-        all_py = np.array([jet.py for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)])
-        return sum(np.square(all_px) + np.square(all_py)) ** 0.5
+        all_pts = [jet.pt for jet in self.jets if (jet.pt > pt_cutoff and jet.eta < eta_cutoff)]
+        return sum(all_pts)
 
     @staticmethod
     def jet_nsubjettiness(jet, R=1.0, max_tau=4):
@@ -232,9 +237,11 @@ class Event:
         """
         :return: array containing: mjj, nj, m_tot, first 2 tau21
         """
-        ## return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
-        return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
-               self.all_tau21[:2] + self.parton_data + [int(self.is_signal)]
+        # return [self.mjj, self.nj, self.m_tot, self.m1, self.m2] + self.all_tau21[:2] # original obs
+        return [self.mjj, self.m_tot, self.m1, self.m2, int(self.is_signal)]
+        # return [self.mjj, self.nj, self.m_tot, self.m1, self.m2, self.m1_minus_m2, self.lead_pt, self.ht, self.mht] + \
+        #        self.all_tau21[:2] + self.parton_data + [int(self.is_signal)]
+        # return [self.nj, self.ht, self.mht, int(self.is_signal)]
 
     @cached_property
     def parton_data(self, n_jets=4, n_partons=10):

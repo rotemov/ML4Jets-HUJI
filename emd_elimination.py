@@ -6,6 +6,9 @@ from tqdm import tqdm
 from xlwt import Workbook
 import os
 import itertools
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.preprocessing import StandardScaler
+
 
 EMD_CUT_OFF = 5000
 
