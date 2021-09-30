@@ -1,6 +1,12 @@
 from event_file_parser import EventFileParser
 import numpy as np
-import os
+import pandas as pd
+from tqdm import tqdm
+import matplotlib
+matplotlib.use('Agg')
+import h5py
+from matplotlib import pyplot as plt
+
 
 """
 File the data was created from.
@@ -75,8 +81,9 @@ def create_partial_data_set(full_data_name, data_path, experiment_name, obs_list
 
 def main():
     R = 1.0
-    p = EventFileParser(TRAINING_DATA_FILE_PATH, CSV_FILE_PATH.format(R), R=R)
-    p.parse()
+    for R in [1.0, 0.4, 0.7]:
+        p = EventFileParser(TRAINING_DATA_FILE_PATH, CSV_FILE_PATH.format(R), R=R)
+        p.parse()
     # create_full_data(DATA_PATH)  # need to shuffle jets and partons for supervised training
     """
     for i in range(len(EXPERIMENT_NAMES)):
@@ -87,5 +94,84 @@ def main():
     """
 
 
+def reorganize_data():
+    num_events = 1100288
+    num_chunks = 10787
+    chunk_size = int(num_events / num_chunks)
+    bg_only = pd.HDFStore('{}bg_data_truthbit_mjj_tau21.h5'.format(DATA_PATH), complib='zlib')
+    combined = pd.HDFStore('{}combined_data_truthbit_mjj_tau21.h5'.format(DATA_PATH), complib='zlib')
+    mjj_tau21_cols = [176, 185]
+    mjj_tau21 = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_cols)
+    n_bg = 0
+    for i in tqdm(range(num_chunks)):
+        start = chunk_size * i
+        stop = chunk_size * (i+1)
+        df = pd.read_hdf(TRAINING_DATA_FILE_PATH, start=start, stop=stop)
+        df["mjj"] = mjj_tau21.values[start:stop, 0]
+        df["tau21"] = mjj_tau21.values[start:stop, 1]
+        mask = df[2100] == 0
+        if n_bg < 5*10**5:
+            bg_only.append('data', df[mask])
+            combined.append('data', df[~mask])
+            n_bg += np.sum(mask)
+        else:
+            combined.append('data', df)
+    bg_only.close()
+    combined.close()
+
+
+def plot_1d_histograms(obs, sig_mask, prefix, xlabel, log=False):
+    sig = obs[sig_mask]
+    bg = obs[~sig_mask]
+    # fig, axs = plt.subplots(1, 3, sharey=True, tight_layout=True)
+    n_bins = [10, 20, 30]
+    for i, n in enumerate(n_bins):
+        # combined = trim_outliers(np.hstack((sig[:, i], bg[:, i])), trim_percent)
+        plt.figure()
+        bins = np.histogram(obs, bins=n)[1]
+        if log:
+            bins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+            plt.xscale('log')
+        plt.hist(obs, bins=bins, label="combined", color="purple", log=True)
+        plt.hist(bg, color="b", label="bg", log=True, bins=bins)
+        plt.hist(sig, color="r", label="sig", log=True, bins=bins)
+        plt.legend()
+        plt.title("{}, N={}".format(prefix, n))
+        plt.xlabel(xlabel)
+        plt.ylabel("Num events")
+        plt.savefig("{}histograms/1d_{}_nbins{}.png".format(DATA_PATH, prefix, n))
+        plt.close()
+
+
+def plot_2d_histograms(mjj, tau21, prefix):
+    n_bins = [10, 20, 30]
+    for n_mjj in n_bins:
+        for n_tau21 in n_bins:
+            plt.figure()
+            plt.xscale('log')
+            _, bins_mjj, bins_tau21 = np.histogram2d(mjj, tau21, [n_mjj, n_tau21])
+            bins = np.logspace(np.log10(bins_mjj[0]), np.log10(bins_mjj[-1]), len(bins))
+            plt.hist2d(mjj, tau21, bins=[bins_mjj, bins_tau21])
+            plt.title("{}, Nmjj={}, Ntau21={}".format(prefix, n_mjj, n_tau21))
+            plt.xlabel("$M_{jj}[GeV]$")
+            plt.ylabel("$\\tau_{21}$")
+            plt.savefig("{}histograms/2d_{}_nmjj{}_ntau21{}.png".format(DATA_PATH, prefix, n_mjj, n_tau21))
+            plt.close()
+
+
+def plot_all_histograms():
+    mjj_tau21_sig_cols = [176, 185, 189]
+    mjj_tau21_sig = pd.read_csv(CSV_FILE_PATH.format(0.7), usecols=mjj_tau21_sig_cols).values
+    sig_mask = mjj_tau21_sig[:, 2] == 1
+    plot_1d_histograms(mjj_tau21_sig[:, 0], sig_mask, "mjj", "$M_{jj}[GeV]$", log=True)
+    plot_1d_histograms(mjj_tau21_sig[:, 1], sig_mask, "tau21", "$\\tau_{21}$")
+    sig = mjj_tau21_sig[sig_mask]
+    bg = mjj_tau21_sig[~sig_mask]
+    plot_2d_histograms(sig[:, 0], sig[:, 1], "sig")
+    plot_2d_histograms(bg[:, 0], bg[:, 1], "bg")
+    plot_2d_histograms(mjj_tau21_sig[:, 0], mjj_tau21_sig[:, 1], "combined")
+
+
 if __name__ == "__main__":
-    main()
+    reorganize_data()
+    plot_all_histograms()
